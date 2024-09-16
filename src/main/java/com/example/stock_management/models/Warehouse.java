@@ -5,6 +5,7 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Warehouse {
+
     @Id
     public Integer id;
 
@@ -13,6 +14,17 @@ public class Warehouse {
     public Float latitude;
 
     public Float longitude;
+
+    public Warehouse(Integer id, String name, Float latitude, Float longitude) {
+        this.id = id;
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public Warehouse() {
+
+    }
 
     public Integer getId() {
         return id;
