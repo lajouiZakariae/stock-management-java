@@ -1,13 +1,10 @@
 package com.example.stock_management.controllers;
 
 import com.example.stock_management.models.Warehouse;
-import com.example.stock_management.repo.WarehouseRepo;
 import com.example.stock_management.services.WarehouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @RestController
 public class WarehouseController {
@@ -15,19 +12,8 @@ public class WarehouseController {
     @Autowired
     WarehouseService warehouseService;
 
-    @Autowired
-    WarehouseRepo warehouseRepo;
-
     @GetMapping("/warehouses")
-    public List<Warehouse> getAllWarehouses() {
-//        List<Warehouse> warehouses = new ArrayList<>(List.of(
-//                new Warehouse(103,"Tanger",25f,35f),
-//                new Warehouse(104,"Casablanca",35f,45f)
-//        ));
-
-//        warehouseRepo.saveAll(warehouses);
-
-        return warehouseService.getAllWarehouses();
+    public void getAllWarehouses(@RequestParam Map<String,Object> params) {
     }
 
     @PostMapping("/warehouses")
@@ -46,11 +32,8 @@ public class WarehouseController {
     }
 
     @PutMapping("/warehouses/{warehouseId}")
-    public Warehouse updateWarehouse(@PathVariable int warehouseId,@RequestBody Warehouse warehouse) {
-
-        warehouse.setId(warehouseId);
-
-        return warehouseService.updateWarehouse(warehouse);
+    public Warehouse updateWarehouse(@PathVariable int warehouseId, @RequestBody Map<String,Object> warehouseData) {
+        return warehouseService.updateWarehouse(warehouseId,warehouseData);
     }
 
 }
