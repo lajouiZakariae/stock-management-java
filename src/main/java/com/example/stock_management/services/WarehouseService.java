@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -21,16 +22,19 @@ public class WarehouseService {
     @Autowired
     private  WarehouseRepo warehouseRepo;
 
-    public Page<Warehouse> getPaginatedWarehouses(int page, int size) {
-        return  warehouseRepo.findAll(PageRequest.of(page, size));
-    }
+    public List<Warehouse> getPaginatedWarehouses(@RequestParam Map<String,Object> params) {
+//        Specification<Warehouse> spec = Specification
+//                .where(WarehouseSpecification.buildSpecification(params));
 
-    public List<Warehouse> getAllWarehouses(String name) {
-        Specification<Warehouse> spec = Specification
-                .where(WarehouseSpecification.hasName(name));
-
-        return warehouseRepo.findAll(spec);
+        return  warehouseRepo.findAll();
     }
+//
+//    public Page<Warehouse> getAllWarehouses(Map<String,String> filter,Integer page) {
+//        Specification<Warehouse> spec = Specification
+//                .where(WarehouseSpecification.hasName(filter.get("name")));
+//
+//        return  warehouseRepo.findAll(spec,PageRequest.of(page,10));
+//    }
 
     public Warehouse getWarehouseById(Integer id)  {
         return warehouseRepo
@@ -55,7 +59,7 @@ public class WarehouseService {
                     });
                     return warehouseRepo.save(foundWarehouse);
                 })
-                .orElseThrow(()->new NotFoundException("Warehouse"));
+                .orElseThrow(()->new NotFoundException("Warehouse Not Found"));
     }
 
     public void deleteWarehouse(Integer id) {
