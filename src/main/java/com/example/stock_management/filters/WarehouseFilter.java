@@ -1,9 +1,6 @@
 package com.example.stock_management.filters;
 
-
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,10 +10,7 @@ import lombok.Setter;
 @Getter
 public class WarehouseFilter {
 
-    @Min(3)
-    @Max(7)
-    @NotBlank(message = "The name is required.")
+    @Size(max = 255)
     private String name;
-
 
 }

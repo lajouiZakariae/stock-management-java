@@ -24,6 +24,12 @@ public class Warehouse {
     @Column
     public Float longitude;
 
+    @Column
+    private Integer minCapacity;
+
+    @Column
+    private Integer maxCapacity;
+
     @Override
     public String toString() {
         return "Warehouse{" +
