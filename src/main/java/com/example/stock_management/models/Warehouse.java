@@ -10,19 +10,18 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "warehouses")
+@ToString
 public class Warehouse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
 
-    @Column
     public String name;
 
-    @Column
-    public Float latitude;
+    public Double latitude;
 
     @Column
-    public Float longitude;
+    public Double longitude;
 
     @Column
     private Integer minCapacity;
@@ -30,13 +29,7 @@ public class Warehouse {
     @Column
     private Integer maxCapacity;
 
-    @Override
-    public String toString() {
-        return "Warehouse{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                '}';
-    }
+    // Path or URL to the image
+    @Column
+    private String imagePath;
 }
