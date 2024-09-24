@@ -41,7 +41,7 @@ public class WarehouseController {
     }
 
     @DeleteMapping("/{warehouseId}")
-    public void deleteWarehouse(@PathVariable int warehouseId) {
+    public void deleteWarehouse(@PathVariable int warehouseId) throws IOException, ResourceNotFoundException {
         warehouseService.deleteWarehouse(warehouseId);
     }
 

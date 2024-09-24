@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -80,8 +81,14 @@ public class WarehouseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse Not Found"));
     }
 
-    public void deleteWarehouse(Integer id) {
-        warehouseRepo.deleteById(id);
+    public void deleteWarehouse(Integer id) throws ResourceNotFoundException, IOException {
+        Warehouse warehouse = warehouseRepo
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
+
+        fileStorageService.deleteFile(warehouse.getImagePath());
+
+        warehouseRepo.delete(warehouse);
     }
 
 }
