@@ -5,7 +5,7 @@ import com.example.stock_management.dtos.WarehouseFilter;
 import com.example.stock_management.exceptions.FileNotUploadedException;
 import com.example.stock_management.exceptions.ResourceNotFoundException;
 import com.example.stock_management.models.Warehouse;
-import com.example.stock_management.repo.WarehouseRepo;
+import com.example.stock_management.repositories.WarehouseRepository;
 import com.example.stock_management.speceifications.WarehouseSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,7 +24,7 @@ import java.util.Map;
 @Service
 public class WarehouseService {
 
-    private final WarehouseRepo warehouseRepo;
+    private final WarehouseRepository warehouseRepository;
 
     private final FileStorageService fileStorageService;
 
@@ -35,11 +35,11 @@ public class WarehouseService {
             warehouseSpecification = warehouseSpecification.and(WarehouseSpecification.hasNameLike(warehouseFilter.getName()));
         }
 
-        return warehouseRepo.findAll(warehouseSpecification, PageRequest.of(page, perPage));
+        return warehouseRepository.findAll(warehouseSpecification, PageRequest.of(page, perPage));
     }
 
     public Warehouse getWarehouseById(Integer id) throws ResourceNotFoundException {
-        return warehouseRepo
+        return warehouseRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
     }
@@ -60,11 +60,11 @@ public class WarehouseService {
         warehouse.setImagePath(fileStorageService.storeFile(imageFile));
 
         // Persist to the database
-        return warehouseRepo.save(warehouse);
+        return warehouseRepository.save(warehouse);
     }
 
     public Warehouse updateWarehouse(Integer id, Map<String, Object> warehouseData) throws ResourceNotFoundException {
-        return warehouseRepo.findById(id)
+        return warehouseRepository.findById(id)
                 .map((Warehouse foundWarehouse) -> {
                     warehouseData.forEach((key, value) -> {
                         Field field = ReflectionUtils.findField(Warehouse.class, key);
@@ -75,19 +75,19 @@ public class WarehouseService {
                         }
 
                     });
-                    return warehouseRepo.save(foundWarehouse);
+                    return warehouseRepository.save(foundWarehouse);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse Not Found"));
     }
 
-    public void deleteWarehouse(Integer id) throws ResourceNotFoundException, IOException {
-        Warehouse warehouse = warehouseRepo
+    public void deleteWarehouse(Integer id) throws ResourceNotFoundException {
+        Warehouse warehouse = warehouseRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
 
-        fileStorageService.deleteFile(warehouse.getImagePath());
+        //  fileStorageService.deleteFile(warehouse.getImagePath());
 
-        warehouseRepo.delete(warehouse);
+        warehouseRepository.delete(warehouse);
     }
 
 }

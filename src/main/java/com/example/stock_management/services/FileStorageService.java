@@ -1,7 +1,7 @@
 package com.example.stock_management.services;
 
+import com.example.stock_management.config.StoragePropertiesConfig;
 import com.example.stock_management.exceptions.FileNotUploadedException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,27 +16,45 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    private final Path uploadDir;
+    private final StoragePropertiesConfig storagePropertiesConfig;
 
-    public FileStorageService(@Value("${file.upload-dir}") String uploadDir) throws IOException {
-
-        this.uploadDir = Paths.get(uploadDir).toAbsolutePath().normalize();
-
-        try {
-            Files.createDirectories(this.uploadDir);
-        } catch (IOException ex) {
-            throw new IOException("Could not create upload directory!", ex);
-        }
+    // Constructor that depends on the StoragePropertiesConfig
+    public FileStorageService(StoragePropertiesConfig storagePropertiesConfig)  {
+        this.storagePropertiesConfig = storagePropertiesConfig;
     }
 
     /**
-     * Stores the file and returns the stored file name.
+     * Stores the file in the appropriate folder (local or public) based on the folder type.
      *
-     * @param file the multipart file to store
+     * @param file       the multipart file to store
      * @return the stored file name
      * @throws IOException if an I/O error occurs
      */
     public String storeFile(MultipartFile file) throws IOException, FileNotUploadedException {
+        return storeFileHandle(file, "public");
+    }
+
+    /**
+     * Stores the file in the appropriate folder (local or public) based on the folder type.
+     *
+     * @param file       the multipart file to store
+     * @param folderType the folder type ("local" or "public")
+     * @return the stored file name
+     * @throws IOException if an I/O error occurs
+     */
+    public String storeFile(MultipartFile file, String folderType) throws IOException, FileNotUploadedException {
+        return storeFileHandle(file, folderType);
+    }
+
+    /**
+     * Stores the file in the appropriate folder (local or public) based on the folder type.
+     *
+     * @param file       the multipart file to store
+     * @param folderType the folder type ("local" or "public")
+     * @return the stored file name
+     * @throws IOException if an I/O error occurs
+     */
+    private String storeFileHandle(MultipartFile file, String folderType) throws IOException, FileNotUploadedException {
         String originalFilename = file.getOriginalFilename();
 
         if (originalFilename == null || originalFilename.isBlank()) {
@@ -61,8 +79,14 @@ public class FileStorageService {
             throw new IOException("Filename contains invalid path sequence " + fileName);
         }
 
+        // Get the directory path from StoragePropertiesConfig based on folderType
+        String directoryPath = storagePropertiesConfig.getDirectoryPath(folderType);
+
         // Resolve the target location
-        Path targetLocation = this.uploadDir.resolve(fileName);
+        Path targetLocation = Paths.get(directoryPath).toAbsolutePath().normalize().resolve(fileName);
+
+        // Ensure the directory exists
+        Files.createDirectories(targetLocation.getParent());
 
         // Copy file to the target location (replacing existing file with the same name)
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
@@ -70,24 +94,4 @@ public class FileStorageService {
         return fileName;
     }
 
-    /**
-     * Deletes the file with the given file name.
-     *
-     * @param fileName the name of the file to delete
-     * @throws IOException if an I/O error occurs
-     */
-    public void deleteFile(String fileName) throws IOException {
-        Path filePath = this.uploadDir.resolve(fileName).normalize();
-        Files.deleteIfExists(filePath);
-    }
-
-    /**
-     * Retrieves the file as a Path.
-     *
-     * @param fileName the name of the file to retrieve
-     * @return the Path to the file
-     */
-    public Path getFilePath(String fileName) {
-        return this.uploadDir.resolve(fileName).normalize();
-    }
 }
