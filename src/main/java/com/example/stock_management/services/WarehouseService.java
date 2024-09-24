@@ -1,9 +1,9 @@
 package com.example.stock_management.services;
 
 import com.example.stock_management.dtos.CreateWarehouseRequestDTO;
+import com.example.stock_management.dtos.WarehouseFilter;
 import com.example.stock_management.exceptions.FileNotUploadedException;
 import com.example.stock_management.exceptions.ResourceNotFoundException;
-import com.example.stock_management.filters.WarehouseFilter;
 import com.example.stock_management.models.Warehouse;
 import com.example.stock_management.repo.WarehouseRepo;
 import com.example.stock_management.speceifications.WarehouseSpecification;

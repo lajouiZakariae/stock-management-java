@@ -1,4 +1,4 @@
-package com.example.stock_management.filters;
+package com.example.stock_management.dtos;
 
 import jakarta.validation.constraints.Size;
 import lombok.Data;
