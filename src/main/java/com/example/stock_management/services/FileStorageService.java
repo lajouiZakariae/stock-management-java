@@ -1,11 +1,10 @@
 package com.example.stock_management.services;
 
 import com.example.stock_management.config.StoragePropertiesConfig;
-import com.example.stock_management.exceptions.FileNotUploadedException;
+import com.example.stock_management.exceptions.InvalidFileOperationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,46 +18,31 @@ public class FileStorageService {
     private final StoragePropertiesConfig storagePropertiesConfig;
 
     // Constructor that depends on the StoragePropertiesConfig
-    public FileStorageService(StoragePropertiesConfig storagePropertiesConfig)  {
+    public FileStorageService(StoragePropertiesConfig storagePropertiesConfig) {
         this.storagePropertiesConfig = storagePropertiesConfig;
     }
 
-    /**
-     * Stores the file in the appropriate folder (local or public) based on the folder type.
-     *
-     * @param file       the multipart file to store
-     * @return the stored file name
-     * @throws IOException if an I/O error occurs
-     */
-    public String storeFile(MultipartFile file) throws IOException, FileNotUploadedException {
+    public String storeFile(MultipartFile file) {
         return storeFileHandle(file, "public");
     }
 
-    /**
-     * Stores the file in the appropriate folder (local or public) based on the folder type.
-     *
-     * @param file       the multipart file to store
-     * @param folderType the folder type ("local" or "public")
-     * @return the stored file name
-     * @throws IOException if an I/O error occurs
-     */
-    public String storeFile(MultipartFile file, String folderType) throws IOException, FileNotUploadedException {
+    public String storeFile(MultipartFile file, String folderType) {
         return storeFileHandle(file, folderType);
     }
 
-    /**
-     * Stores the file in the appropriate folder (local or public) based on the folder type.
-     *
-     * @param file       the multipart file to store
-     * @param folderType the folder type ("local" or "public")
-     * @return the stored file name
-     * @throws IOException if an I/O error occurs
-     */
-    private String storeFileHandle(MultipartFile file, String folderType) throws IOException, FileNotUploadedException {
+    public void deleteFile(String imagePath) {
+        deleteFileHandle(imagePath, "public");
+    }
+
+    public void deleteFile(String imagePath, String folderType) {
+        deleteFileHandle(imagePath, folderType);
+    }
+
+    private String storeFileHandle(MultipartFile file, String folderType) {
         String originalFilename = file.getOriginalFilename();
 
         if (originalFilename == null || originalFilename.isBlank()) {
-            throw new FileNotUploadedException("File is Empty");
+            throw new InvalidFileOperationException("File is Empty");
         }
 
         // Normalize file name
@@ -76,7 +60,7 @@ public class FileStorageService {
 
         // Check for invalid characters
         if (fileName.contains("..")) {
-            throw new IOException("Filename contains invalid path sequence " + fileName);
+            throw new RuntimeException("Filename contains invalid path sequence " + fileName);
         }
 
         // Get the directory path from StoragePropertiesConfig based on folderType
@@ -85,13 +69,34 @@ public class FileStorageService {
         // Resolve the target location
         Path targetLocation = Paths.get(directoryPath).toAbsolutePath().normalize().resolve(fileName);
 
-        // Ensure the directory exists
-        Files.createDirectories(targetLocation.getParent());
+        try {
+            // Ensure the directory exists
+            Files.createDirectories(targetLocation.getParent());
 
-        // Copy file to the target location (replacing existing file with the same name)
-        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+            // Copy file to the target location (replacing existing file with the same name)
+            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Throwable e) {
+            throw new InvalidFileOperationException(e.getMessage());
+        }
 
         return fileName;
     }
 
+    private void deleteFileHandle(String imagePath, String folderType) {
+        Path targetDir = Paths.get(storagePropertiesConfig.getDirectoryPath(folderType));
+
+        // Resolve the file path
+        Path filePath = targetDir.resolve(imagePath).normalize();
+
+        if (!Files.exists(filePath)) {
+            throw new InvalidFileOperationException("File Not Found");
+        }
+
+        try {
+            Files.delete(filePath);
+        } catch (Throwable e) {
+            throw new InvalidFileOperationException(e.getMessage());
+        }
+
+    }
 }

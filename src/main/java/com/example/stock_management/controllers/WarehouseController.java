@@ -1,18 +1,14 @@
 package com.example.stock_management.controllers;
 
 import com.example.stock_management.dtos.CreateWarehouseRequestDTO;
+import com.example.stock_management.dtos.UpdateWarehouseRequestDto;
 import com.example.stock_management.dtos.WarehouseFilter;
-import com.example.stock_management.exceptions.FileNotUploadedException;
-import com.example.stock_management.exceptions.ResourceNotFoundException;
 import com.example.stock_management.models.Warehouse;
 import com.example.stock_management.services.WarehouseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,23 +27,23 @@ public class WarehouseController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public Warehouse addWarehouse(@Valid @ModelAttribute CreateWarehouseRequestDTO warehousePayload) throws IOException, FileNotUploadedException {
+    public Warehouse addWarehouse(@Valid @ModelAttribute CreateWarehouseRequestDTO warehousePayload) {
         return warehouseService.addWarehouse(warehousePayload);
     }
 
     @GetMapping("/{warehouseId}")
-    public Warehouse getWarehouse(@PathVariable int warehouseId) throws ResourceNotFoundException {
+    public Warehouse getWarehouse(@PathVariable int warehouseId) {
         return warehouseService.getWarehouseById(warehouseId);
     }
 
     @DeleteMapping("/{warehouseId}")
-    public void deleteWarehouse(@PathVariable int warehouseId) throws IOException, ResourceNotFoundException {
+    public void deleteWarehouse(@PathVariable int warehouseId) {
         warehouseService.deleteWarehouse(warehouseId);
     }
 
     @PutMapping("/{warehouseId}")
-    public Warehouse updateWarehouse(@PathVariable int warehouseId, @RequestBody Map<String, Object> warehouseData) throws ResourceNotFoundException {
-        return warehouseService.updateWarehouse(warehouseId, warehouseData);
+    public Warehouse updateWarehouse(@PathVariable int warehouseId, @Valid UpdateWarehouseRequestDto warehouseData) {
+         return warehouseService.updateWarehouse(warehouseId, warehouseData);
     }
 
 }
